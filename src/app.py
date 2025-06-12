@@ -94,20 +94,11 @@ def get_activities():
 @app.post("/activities/{activity_name}/signup")
 def signup_for_activity(activity_name: str, email: str):
     """Sign up a student for an activity"""
-    # Validate student is not already signed up
-    if not email:
-        raise HTTPException(status_code=400, detail="Email is required")
-    if "@" not in email or "." not in email:
-        raise HTTPException(status_code=400, detail="Invalid email format")
-    if email in [p for a in activities.values() for p in a["participants"]]:
-        raise HTTPException(status_code=400, detail="Student already signed up")
-    # Validate activity exists
-    if activity_name not in activities:
-        raise HTTPException(status_code=404, detail="Activity not found")
-
     # Get the specific activity
     activity = activities[activity_name]
 
     # Add student
+    if email in activity["participants"]:
+        raise HTTPException(status_code=400, detail=f"{email} is already signed up for {activity_name}")
     activity["participants"].append(email)
     return {"message": f"Signed up {email} for {activity_name}"}
